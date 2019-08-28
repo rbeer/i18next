@@ -1,6 +1,6 @@
 import Interpolator from '../src/Interpolator';
 
-describe('Interpolator', () => {
+describe.only('Interpolator', () => {
   describe('interpolate()', () => {
     var ip;
 
@@ -113,6 +113,11 @@ describe('Interpolator', () => {
         description: 'uses maxReplaces if provided',
         options: { interpolation: { maxReplaces: 100 } },
         expected: { maxReplaces: 100 },
+      },
+      {
+        description: 'uses defaultVariables',
+        options: { interpolation: { defaultVariables: { foo: 'bar' } } },
+        expected: { defaultVariables: { foo: 'bar' } },
       },
     ];
 
@@ -280,6 +285,33 @@ describe('Interpolator', () => {
     tests.forEach(test => {
       it('correctly nests for ' + JSON.stringify(test.args) + ' args', () => {
         expect(ip.nest.apply(ip, test.args)).to.eql(test.expected);
+      });
+    });
+  });
+
+  describe('interpolate() - defaultVariables', () => {
+    var ip;
+
+    before(() => {
+      ip = new Interpolator({
+        interpolation: {
+          defaultVariables: {
+            foo: 'bar',
+          },
+        },
+      });
+    });
+
+    var tests = [
+      {
+        args: ['test {{foo}}'],
+        expected: 'test bar',
+      },
+    ];
+
+    tests.forEach(test => {
+      it('correctly applies defaultVariables for ' + JSON.stringify(test.args) + ' args', () => {
+        expect(ip.interpolate.apply(ip, test.args)).to.eql(test.expected);
       });
     });
   });

@@ -38,6 +38,8 @@ class Interpolator {
       ? utils.regexEscape(iOpts.nestingSuffix)
       : iOpts.nestingSuffixEscaped || utils.regexEscape(')');
 
+    this.defaultVariables = iOpts.defaultVariables ? iOpts.defaultVariables : {};
+
     this.maxReplaces = iOpts.maxReplaces ? iOpts.maxReplaces : 1000;
 
     // the regexp
@@ -72,13 +74,22 @@ class Interpolator {
     }
 
     const handleFormat = key => {
-      if (key.indexOf(this.formatSeparator) < 0) return utils.getPath(data, key);
-
+      if (key.indexOf(this.formatSeparator) < 0) {
+        const dataValue = utils.getPath(data, key);
+        return dataValue
+          ? dataValue
+          : utils.getPath(this.options.interpolation.defaultVariables, key) || k;
+      }
       const p = key.split(this.formatSeparator);
       const k = p.shift().trim();
       const f = p.join(this.formatSeparator).trim();
 
-      return this.format(utils.getPath(data, k), f, lng);
+      const dataValue = utils.getPath(data, k);
+      const value = dataValue
+        ? dataValue
+        : utils.getPath(this.options.interpolation.defaultVariables, k) || k;
+      console.log(dataValue);
+      return this.format(value, f, lng);
     };
 
     this.resetRegExp();
